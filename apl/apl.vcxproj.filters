@@ -21,9 +21,24 @@
     <ClCompile Include="wave.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="dft.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pitch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="signal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="wave.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pitch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="signal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

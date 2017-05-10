@@ -1,3 +1,8 @@
+#define _USE_MATH_DEFINES
+
+#include <cassert>
+#include <cmath> 
+#include <fstream>
 #include "wave.hpp"
 
 using namespace apl;
@@ -16,13 +21,13 @@ wave::wave(wave&& that) {
 	*this = std::move(that);
 }
 
-wave::wave(unsigned int sampleRate, unsigned short numChannels, unsigned int numSamples) {
+wave::wave(unsigned int sampleRate, unsigned short numChannels) {
 	this->sampleRate = sampleRate;
 	this->numChannels = numChannels;
 	this->bitDepth = 0;
-	this->numSamples = numSamples;
-	duration = numSamples / (double)sampleRate;
-	length = numSamples*numChannels;
+	this->numSamples = 0;
+	duration = 0;
+	length = 0;
 	allocated = false;
 }
 
@@ -34,7 +39,7 @@ wave::wave(unsigned int sampleRate, unsigned short numChannels, unsigned int num
 	duration = numSamples / (double)sampleRate;
 	length = numSamples*numChannels;
 	data = new double[length];
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] = initValue;
 	}
 	allocated = true;
@@ -48,17 +53,28 @@ wave::wave(unsigned int sampleRate, unsigned short numChannels, unsigned int num
 	duration = numSamples / (double)sampleRate;
 	length = numSamples*numChannels;
 	data = new double[length];
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] = copy[i];
 	}
 	allocated = true;
 }
 
-wave::wave(const std::string filename) {
+wave::wave(unsigned int sampleRate, unsigned short numChannels, unsigned int numSamples, double* data) {
+	this->sampleRate = sampleRate;
+	this->numChannels = numChannels;
+	this->bitDepth = 0;
+	this->numSamples = numSamples;
+	duration = numSamples / (double)sampleRate;
+	length = numSamples*numChannels;
+	this->data = data;
+	allocated = true;
+}
+
+wave::wave(const std::string& filename) {
 	read(filename);
 }
 
-bool wave::read(const std::string filename) {
+bool wave::read(const std::string& filename) {
 	if (filename.substr(filename.length() - 4, 4) != std::string(".wav")) {
 		return false;
 	}
@@ -102,13 +118,13 @@ bool wave::read(const std::string filename) {
 	char* start = temp + 44;
 	if (bitDepth == 8) {
 		data = new double[length];
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			data[i] = (((unsigned char*)start)[i] - 127) / 128.0;
 		}
 	}
 	else if (bitDepth == 16) {
 		data = new double[length];
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			data[i] = ((short*)start)[i] / 32768.0;
 		}
 	}
@@ -121,7 +137,7 @@ bool wave::read(const std::string filename) {
 	return true;
 }
 
-bool wave::write(const std::string filename, unsigned short bitDepth) { // continue
+bool wave::write(const std::string& filename, unsigned short bitDepth) {
 	if (!allocated || (bitDepth != 8 && bitDepth != 16)) {
 		return false;
 	}
@@ -148,7 +164,7 @@ bool wave::write(const std::string filename, unsigned short bitDepth) { // conti
 	char* temp = new char[size];
 	if (bitDepth == 8) {
 		unsigned char* start = (unsigned char*)temp;
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			double value = round(data[i] * 128.0 + 127.0);
 			if (value > 255) {
 				value = 255;
@@ -161,7 +177,7 @@ bool wave::write(const std::string filename, unsigned short bitDepth) { // conti
 	}
 	if (bitDepth == 16) {
 		short* start = (short*)temp;
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			double value = round(data[i] * 32768.0);
 			if (value > 32767) {
 				value = 32767;
@@ -189,7 +205,7 @@ wave& wave::operator=(const wave& that) {
 			delete[] data;
 		}
 		data = new double[length];
-		for (unsigned int i = 0; i < length; i++) {
+		for (unsigned int i = 0; i < length; ++i) {
 			data[i] = that.data[i];
 		}
 		allocated = true;
@@ -205,11 +221,11 @@ wave& wave::operator=(wave&& that) {
 		numSamples = that.numSamples;
 		duration = that.duration;
 		length = that.length;
-		allocated = that.allocated;
 		if (allocated) {
 			delete[] data;
 		}
 		data = that.data;
+		allocated = that.allocated;
 		that.data = nullptr;
 	}
 	return *this;
@@ -220,7 +236,7 @@ wave& wave::operator+=(const wave& that) {
 	if (bitDepth != that.bitDepth) {
 		bitDepth = 0;
 	}
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] += that.data[i];
 	}
 	return *this;
@@ -228,7 +244,7 @@ wave& wave::operator+=(const wave& that) {
 
 wave& wave::operator+=(double constant) {
 	bitDepth = 0;
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] += constant;
 	}
 	return *this;
@@ -239,7 +255,7 @@ wave& wave::operator-=(const wave& that) {
 	if (bitDepth != that.bitDepth) {
 		bitDepth = 0;
 	}
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] -= that.data[i];
 	}
 	return *this;
@@ -247,7 +263,7 @@ wave& wave::operator-=(const wave& that) {
 
 wave& wave::operator-=(double constant) {
 	bitDepth = 0;
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] -= constant;
 	}
 	return *this;
@@ -258,7 +274,7 @@ wave& wave::operator*=(const wave& that) {
 	if (bitDepth != that.bitDepth) {
 		bitDepth = 0;
 	}
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] *= that.data[i];
 	}
 	return *this;
@@ -266,7 +282,7 @@ wave& wave::operator*=(const wave& that) {
 
 wave& wave::operator*=(double constant) {
 	bitDepth = 0;
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] *= constant;
 	}
 	return *this;
@@ -277,7 +293,7 @@ wave& wave::operator/=(const wave& that) {
 	if (bitDepth != that.bitDepth) {
 		bitDepth = 0;
 	}
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] /= that.data[i];
 	}
 	return *this;
@@ -285,7 +301,7 @@ wave& wave::operator/=(const wave& that) {
 
 wave& wave::operator/=(double constant) {
 	bitDepth = 0;
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		data[i] /= constant;
 	}
 	return *this;
@@ -309,7 +325,7 @@ const wave wave::operator-(double constant) const {
 
 const wave wave::operator-() const{
 	wave ans(*this);
-	for (unsigned int i = 0; i < length; i++) {
+	for (unsigned int i = 0; i < length; ++i) {
 		ans.data[i] *= -1;
 	}
 	return ans;
@@ -329,6 +345,34 @@ const wave wave::operator/(const wave& that) const {
 
 const wave wave::operator/(double constant) const {
 	return wave(*this) /= constant;
+}
+
+void wave::append(const wave& that) {
+	assert(sampleRate == that.sampleRate && numChannels == that.numChannels && that.allocated);
+	unsigned int len = length + that.length;
+	double* temp = new double[len];
+	for (unsigned int i = 0; i < length; ++i) {
+		temp[i] = data[i];
+	}
+	for (unsigned int i = length; i < len; ++i) {
+		temp[i] = that.data[i-length];
+	}
+	length = len;
+	numSamples += that.numSamples;
+	duration += that.duration;
+	data = temp;
+	allocated = true;
+}
+
+wave wave::sine(double frequency, double amplitude, double phase, double duration, unsigned int sampleRate) {
+	assert(2*frequency < sampleRate);
+	int length = ceil(duration*sampleRate);
+	double* x = new double[length];
+	double w = 2*M_PI*frequency/sampleRate;
+	for (unsigned int n = 0; n < length; ++n) {
+		x[n] = amplitude*sin(w*n + phase);
+	}
+	return wave(sampleRate, 1, length, x);
 }
 
 wave::~wave() {
