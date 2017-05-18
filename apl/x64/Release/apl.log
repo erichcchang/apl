@@ -1,0 +1,8 @@
+﻿  main.cpp
+  signal.cpp
+  Generating code
+  Finished generating code
+  22 of 201 functions (10.9%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    24 functions had inline decision re-evaluated but remain unchanged
+  apl.vcxproj -> C:\Users\erich\Source\Repos\apl\x64\Release\apl.exe

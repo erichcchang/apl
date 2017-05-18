@@ -110,12 +110,12 @@ int main(int argc, char* argv[]) {
 	wave left = createwave(voice3, 50, 2)*0.2 + createwave(voice4, 50, 2)*0.2;
 	wave together = left + right;
 	together.write(testDir + "testsyntheticmusic.wav", 16);
-	*/
+	
 
-	double arraya[4] = {1.0, 2.0, 3.0, 4.0};
-	double arrayb[4] = {2, 3, 4, 1};
-	double arrayarev[4] = {4, 3, 2, 1};
-	double arraybrev[4] = {1, 4, 3, 2};
+	complex<double> arraya[4] = {1.0, 2.0, 3.0, 4.0};
+	complex<double> arrayb[4] = {2, 3, 4, 1};
+	complex<double> arrayarev[4] = {4, 3, 2, 1};
+	complex<double> arraybrev[4] = {1, 4, 3, 2};
 	signal a(arraya, 1, 4);
 	signal b(arrayb, 1, 4);
 	signal arev(arrayarev, -4, -1);
@@ -144,10 +144,64 @@ int main(int argc, char* argv[]) {
 	else {
 		cout << "xcorr test failed" << endl;
 	}
-	aconvb.print();
-	bconva.print();
-	acorrb.print();
-	arevconvb.print();
-	bcorra.print();
-	brevconva.print();
+	cout.setf(ios::fixed, ios::floatfield);
+	cout.precision(5);
+	cout << aconvb << endl;
+	cout << bconva << endl;
+	cout << acorrb << endl;
+	cout << arevconvb << endl;
+	cout << bcorra << endl;
+	cout << brevconva << endl;
+
+	signal c(arraya, 0, 3);
+	signal d(arrayb, 0, 3);
+	signal cdft = c.dft();
+	signal ddft = d.dft();
+	cout << cdft << endl;
+	cout << ddft << endl;
+	signal ctr = cdft.idft();
+	signal dtr = ddft.idft();
+	cout << ctr << endl;
+	cout << dtr << endl;
+	if (ctr == c && dtr == d) {
+		cout << "dft and idft test passed" << endl;
+	}
+	else {
+		cout << "dft and idft test failed" << endl;
+	}
+	signal cfftcconvd = (cdft * ddft).idft();
+	cout << cfftcconvd << endl;
+	*/
+	signal e(0, 7);
+	signal f(3, 5);
+	signal g(4, 10);
+	signal h(-5, 20);
+	signal i(-7, 2);
+	signal j(10, 13);
+	signal k(-9, -4);
+	signal edotf = 2 - e * f + 1;
+	signal eplusf = e + f;	
+	signal edotg = e * g;
+	signal eplusg = e + g;
+	signal edoth = e * h;
+	signal eplush = e + h;
+	signal edoti = e * i;
+	signal eplusi = e + i;
+	signal edotj = e * j;
+	signal eplusj = e + j;
+	signal edotk = e * k;
+	signal eplusk = e + k;
+	
+	cout << edotf << endl;
+	cout << eplusf << endl;
+	cout << edotg << endl;
+	cout << eplusg << endl;
+	cout << edoth << endl;
+	cout << eplush << endl;
+	cout << edoti << endl;
+	cout << eplusi << endl;
+	cout << edotj << endl;
+	cout << eplusj << endl;
+	cout << edotk << endl;
+	cout << eplusk << endl;
 }

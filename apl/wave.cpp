@@ -366,7 +366,7 @@ void wave::append(const wave& that) {
 
 wave wave::sine(double frequency, double amplitude, double phase, double duration, unsigned int sampleRate) {
 	assert(2*frequency < sampleRate);
-	int length = ceil(duration*sampleRate);
+	unsigned int length = (unsigned int)ceil(duration*sampleRate);
 	double* x = new double[length];
 	double w = 2*M_PI*frequency/sampleRate;
 	for (unsigned int n = 0; n < length; ++n) {
